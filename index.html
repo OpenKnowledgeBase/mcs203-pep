@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCS-203 Study Guide | Object-Oriented Programming in C++</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@iconscout/unicons@4.0.8/css/line.min.css">
+    <style>
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .active-tab {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .dark .active-tab {
+            background-color: #1e40af;
+        }
+        .search-highlight {
+            background-color: #fef08a;
+            color: #1c1917;
+        }
+        .dark .search-highlight {
+            background-color: #f59e0b;
+            color: #1e293b;
+        }
+        .flashcard {
+            perspective: 1000px;
+            height: 300px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <h1 class="text-xl font-bold text-gray-800 dark:text-white">MCS-203 Study Guide</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="uil uil-moon text-xl dark:hidden"></i>
+                    <i class="uil uil-sun text-xl hidden dark:block"></i>
+                </button>
+                <button id="searchToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="uil uil-search text-xl"></i>
+                </button>
+                <button id="menuToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 md:hidden">
+                    <i class="uil uil-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden">
+        <div class="container mx-auto px-4 pt-20">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl mx-auto p-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search topics, keywords..." 
+                        class="w-full p-4 pl-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <i class="uil uil-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                    <button id="closeSearch" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i class="uil uil-times text-xl"></i>
+                    </button>
+                </div>
+                <div id="searchResults" class="mt-4 max-h-96 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 z-40 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md transform translate-x-full transition-transform duration-300 md:hidden">
+        <div class="container mx-auto px-4 py-20">
+            <div class="flex justify-end">
+                <button id="closeMenu" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="uil uil-times text-2xl"></i>
+                </button>
+            </div>
+            <nav class="mt-8">
+                <ul class="space-y-4">
+                    <li><a href="#home" class="block py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg font-medium">Home</a></li>
+                    <li><a href="#scheduling-algorithms" class="block py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg font-medium">Scheduling Algorithms</a></li>
+                    <li><a href="#page-replacement" class="block py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg font-medium">Page Replacement</a></li>
+                    <li><a href="#disk-scheduling" class="block py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg font-medium">Disk Scheduling</a></li>
+                    <li><a href="#bankers-algorithm" class="block py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg font-medium">Banker's Algorithm</a></li>
+                    <li><a href="#windows-os" class="block py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg font-medium">Windows 11 OS</a></li>
+                    <li><a href="#luneos" class="block py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg font-medium">LuneOS</a></li>
+                    <li><a href="#quick-revision" class="block py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg font-medium">Quick Revision</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <section id="home" class="mb-16 pt-8">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800 dark:text-white">MCS-203 Study Guide</h1>
+                    <h2 class="text-2xl md:text-3xl font-semibold mb-6 text-blue-600 dark:text-blue-400">Object-Oriented Programming in C++</h2>
+                    <p class="text-lg mb-6 text-gray-600 dark:text-gray-300">Comprehensive study materials for IGNOU BCA New Syllabus, Semester 2. Everything you need to prepare for your exams in one place.</p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#scheduling-algorithms" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">Start Learning</a>
+                        <a href="#quick-revision" class="px-6 py-3 border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors">Quick Revision</a>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center mb-4">
+                            <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-inner">
+                            <pre class="text-sm font-mono text-gray-800 dark:text-gray-200 overflow-x-auto">
+<span class="text-blue-600">#include</span> <span class="text-green-600">&lt;iostream&gt;</span>
+<span class="text-blue-600">using namespace</span> std;
+
+<span class="text-blue-600">class</span> <span class="text-purple-600">Student</span> {
+<span class="text-blue-600">private</span>:
+    string name;
+    <span class="text-blue-600">int</span> age;
+<span class="text-blue-600">public</span>:
+    Student(string n, <span class="text-blue-600">int</span> a) : name(n), age(a) {}
+    
+    <span class="text-blue-600">void</span> display() {
+        cout << <span class="text-green-600">"Name: "</span> << name << endl;
+        cout << <span class="text-green-600">"Age: "</span> << age << endl;
+    }
+};
+
+<span class="text-blue-600">int</span> main() {
+    Student s1(<span class="text-green-600">"John"</span>, 20);
+    s1.display();
+    <span class="text-blue-600">return</span> 0;
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <div class="sticky top-16 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm mb-8">
+            <div class="container mx-auto px-4">
+                <div class="flex overflow-x-auto scrollbar-hide">
+                    <a href="#scheduling-algorithms" class="tab-link px-4 py-3 whitespace-nowrap font-medium">Scheduling</a>
+                    <a href="#page-replacement" class="tab-link px-4 py-3 whitespace-nowrap font-medium">Page Replacement</a>
+                    <a href="#disk-scheduling" class="tab-link px-4 py-3 whitespace-nowrap font-medium">Disk Scheduling</a>
+                    <a href="#bankers-algorithm" class="tab-link px-4 py-3 whitespace-nowrap font-medium">Banker's Algo</a>
+                    <a href="#windows-os" class="tab-link px-4 py-3 whitespace-nowrap font-medium">Windows 11</a>
+                    <a href="#luneos" class="tab-link px-4 py-3 whitespace-nowrap font-medium">LuneOS</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheduling Algorithms Section -->
+        <section id="scheduling-algorithms" class="mb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Process Scheduling Algorithms</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">Process scheduling is a fundamental part of operating systems that determines which process runs at any given time. Different algorithms have different characteristics and are suitable for different scenarios.</p>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Priority Scheduling Example</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white dark:bg-gray-700 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-100 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Process</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Burst Time</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">P1</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">8 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">3</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">P2</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">3 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">1</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">P3</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">4 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">4</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">P4</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">7 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">2</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">P5</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">6 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">5</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Gantt Charts for Different Algorithms</h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- FCFS -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">FCFS (First-Come, First-Served)</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <div class="flex items-center mb-2">
+                                        <div class="flex">
+                                            <div class="w-16 h-8 bg-blue-200 dark:bg-blue-800 flex items-center justify-center border-r border-white dark:border-gray-700">P1</div>
+                                            <div class="w-12 h-8 bg-blue-200 dark:bg-blue-800 flex items-center justify-center border-r border-white dark:border-gray-700">P2</div>
+                                            <div class="w-12 h-8 bg-blue-200 dark:bg-blue-800 flex items-center justify-center border-r border-white dark:border-gray-700">P3</div>
+                                            <div class="w-16 h-8 bg-blue-200 dark:bg-blue-800 flex items-center justify-center border-r border-white dark:border-gray-700">P4</div>
+                                            <div class="w-16 h-8 bg-blue-200 dark:bg-blue-800 flex items-center justify-center">P5</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex text-xs text-gray-500 dark:text-gray-400">
+                                        <span class="w-16 text-center">0</span>
+                                        <span class="w-12 text-center">8</span>
+                                        <span class="w-12 text-center">11</span>
+                                        <span class="w-16 text-center">15</span>
+                                        <span class="w-16 text-center">22</span>
+                                        <span class="w-8 text-center">28</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-sm text-gray-600 dark:text-gray-300"><span class="font-medium">Avg Waiting Time:</span> 10.6 ms</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300"><span class="font-medium">Avg Turnaround Time:</span> 16.2 ms</p>
+                                </div>
+                            </div>
+                            
+                            <!-- SJF -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">SJF (Shortest Job First)</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <div class="flex items-center mb-2">
+                                        <div class="flex">
+                                            <div class="w-12 h-8 bg-green-200 dark:bg-green-800 flex items-center justify-center border-r border-white dark:border-gray-700">P2</div>
+                                            <div class="w-12 h-8 bg-green-200 dark:bg-green-800 flex items-center justify-center border-r border-white dark:border-gray-700">P3</div>
+                                            <div class="w-16 h-8 bg-green-200 dark:bg-green-800 flex items-center justify-center border-r border-white dark:border-gray-700">P5</div>
+                                            <div class="w-20 h-8 bg-green-200 dark:bg-green-800 flex items-center justify-center border-r border-white dark:border-gray-700">P1</div>
+                                            <div class="w-16 h-8 bg-green-200 dark:bg-green-800 flex items-center justify-center">P4</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex text-xs text-gray-500 dark:text-gray-400">
+                                        <span class="w-12 text-center">0</span>
+                                        <span class="w-12 text-center">3</span>
+                                        <span class="w-16 text-center">7</span>
+                                        <span class="w-20 text-center">13</span>
+                                        <span class="w-16 text-center">21</span>
+                                        <span class="w-8 text-center">28</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-sm text-gray-600 dark:text-gray-300"><span class="font-medium">Avg Waiting Time:</span> 7.4 ms</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300"><span class="font-medium">Avg Turnaround Time:</span> 13.0 ms</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Priority -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Priority Scheduling</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <div class="flex items-center mb-2">
+                                        <div class="flex">
+                                            <div class="w-12 h-8 bg-purple-200 dark:bg-purple-800 flex items-center justify-center border-r border-white dark:border-gray-700">P2</div>
+                                            <div class="w-16 h-8 bg-purple-200 dark:bg-purple-800 flex items-center justify-center border-r border-white dark:border-gray-700">P4</div>
+                                            <div class="w-20 h-8 bg-purple-200 dark:bg-purple-800 flex items-center justify-center border-r border-white dark:border-gray-700">P1</div>
+                                            <div class="w-12 h-8 bg-purple-200 dark:bg-purple-800 flex items-center justify-center border-r border-white dark:border-gray-700">P3</div>
+                                            <div class="w-16 h-8 bg-purple-200 dark:bg-purple-800 flex items-center justify-center">P5</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex text-xs text-gray-500 dark:text-gray-400">
+                                        <span class="w-12 text-center">0</span>
+                                        <span class="w-16 text-center">3</span>
+                                        <span class="w-20 text-center">10</span>
+                                        <span class="w-12 text-center">18</span>
+                                        <span class="w-16 text-center">22</span>
+                                        <span class="w-8 text-center">28</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-sm text-gray-600 dark:text-gray-300"><span class="font-medium">Avg Waiting Time:</span> 10.6 ms</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300"><span class="font-medium">Avg Turnaround Time:</span> 16.2 ms</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Round Robin -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Round Robin (Quantum=2)</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <div class="flex overflow-x-auto py-2 mb-2">
+                                        <div class="flex">
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P1</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P1</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P2</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P3</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P4</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P4</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P5</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P5</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P3</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P1</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center border-r border-white dark:border-gray-700">P4</div>
+                                            <div class="w-8 h-8 bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center">P5</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex overflow-x-auto text-xs text-gray-500 dark:text-gray-400">
+                                        <span class="w-8 text-center">0</span>
+                                        <span class="w-8 text-center">2</span>
+                                        <span class="w-8 text-center">4</span>
+                                        <span class="w-8 text-center">6</span>
+                                        <span class="w-8 text-center">8</span>
+                                        <span class="w-8 text-center">10</span>
+                                        <span class="w-8 text-center">12</span>
+                                        <span class="w-8 text-center">14</span>
+                                        <span class="w-8 text-center">16</span>
+                                        <span class="w-8 text-center">18</span>
+                                        <span class="w-8 text-center">20</span>
+                                        <span class="w-8 text-center">22</span>
+                                        <span class="w-8 text-center">24</span>
+                                        <span class="w-8 text-center">26</span>
+                                        <span class="w-8 text-center">28</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-sm text-gray-600 dark:text-gray-300"><span class="font-medium">Avg Waiting Time:</span> 12.8 ms</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300"><span class="font-medium">Avg Turnaround Time:</span> 18.4 ms</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Comparison of Scheduling Algorithms</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white dark:bg-gray-700 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-100 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Algorithm</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Avg Waiting Time</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Avg Turnaround Time</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Starvation</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Complexity</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">FCFS</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">10.6 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">16.2 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">No</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Low</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">SJF</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">7.4 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">13.0 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Yes</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Medium</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Priority</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">10.6 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">16.2 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Yes</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Medium</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Round Robin</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">12.8 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">18.4 ms</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">No</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">High</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">Key Takeaways</h4>
+                        <ul class="list-disc pl-5 text-blue-700 dark:text-blue-300 space-y-1">
+                            <li>SJF provides the minimal average waiting time but requires knowledge of process lengths</li>
+                            <li>FCFS is simple but suffers from the "convoy effect"</li>
+                            <li>Priority scheduling is useful when processes have different importance levels</li>
+                            <li>Round Robin provides fairness but has higher overhead due to context switching</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page Replacement Section -->
+        <section id="page-replacement" class="mb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Page Replacement Algorithms</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">Page replacement algorithms decide which memory pages to swap out when a new page needs to be loaded into memory. The goal is to minimize page faults which can significantly impact system performance.</p>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Page Reference String</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <p class="font-mono text-lg text-center text-gray-800 dark:text-gray-200">
+                                1, 2, 3, 4, 2, 1, 5, 6, 2, 1, 2, 3, 7, 6, 3, 2, 1, 2, 3, 6
+                            </p>
+                            <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">(Assuming 3 frames, all initially empty)</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+                        <!-- FIFO -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                            <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">FIFO Replacement</h4>
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Replaces the oldest page in memory.</p>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Page Faults:</span>
+                                    <span class="px-2 py-1 bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200 rounded text-sm font-medium">15</span>
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mb-1">1: [1] (Fault)</p>
+                                    <p class="mb-1">2: [1, 2] (Fault)</p>
+                                    <p class="mb-1">3: [1, 2, 3] (Fault)</p>
+                                    <p class="mb-1">4: [2, 3, 4] (Fault, 1 replaced)</p>
+                                    <p class="text-gray-400 dark:text-gray-500">...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- LRU -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                            <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">LRU Replacement</h4>
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Replaces the least recently used page.</p>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Page Faults:</span>
+                                    <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 rounded text-sm font-medium">12</span>
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mb-1">1: [1] (Fault)</p>
+                                    <p class="mb-1">2: [1, 2] (Fault)</p>
+                                    <p class="mb-1">3: [1, 2, 3] (Fault)</p>
+                                    <p class="mb-1">4: [2, 3, 4] (Fault, 1 replaced)</p>
+                                    <p class="text-gray-400 dark:text-gray-500">...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Optimal -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                            <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Optimal Replacement</h4>
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Replaces page not used for longest time in future.</p>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Page Faults:</span>
+                                    <span class="px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 rounded text-sm font-medium">11</span>
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mb-1">1: [1] (Fault)</p>
+                                    <p class="mb-1">2: [1, 2] (Fault)</p>
+                                    <p class="mb-1">3: [1, 2, 3] (Fault)</p>
+                                    <p class="mb-1">4: [2, 3, 4] (Fault, 1 replaced)</p>
+                                    <p class="text-gray-400 dark:text-gray-500">...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Algorithm Comparison</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white dark:bg-gray-700 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-100 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Algorithm</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Page Faults</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Implementation</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Practical Use</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">FIFO</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">15</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Simple (queue)</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Basic systems</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">LRU</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">12</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Complex (counters/stack)</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">General purpose</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Optimal</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">11</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Not practical (requires future knowledge)</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Benchmarking only</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                        <h4 class="font-semibold text-purple-800 dark:text-purple-200 mb-2">Key Takeaways</h4>
+                        <ul class="list-disc pl-5 text-purple-700 dark:text-purple-300 space-y-1">
+                            <li>Optimal provides the fewest page faults but cannot be implemented in practice</li>
+                            <li>LRU is a good approximation of optimal and is commonly used</li>
+                            <li>FIFO is simple but suffers from Belady's anomaly (more frames can lead to more faults)</li>
+                            <li>The choice depends on the trade-off between implementation complexity and performance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Disk Scheduling Section -->
+        <section id="disk-scheduling" class="mb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Disk Scheduling Algorithms</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">Disk scheduling algorithms determine the order in which disk I/O requests are serviced. The goal is to minimize seek time and maximize disk throughput.</p>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Disk Queue Example</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <p class="text-center text-gray-800 dark:text-gray-200 mb-2">Initial head position: <span class="font-bold">123</span></p>
+                            <p class="font-mono text-lg text-center text-gray-800 dark:text-gray-200">
+                                123, 874, 692, 475, 105, 376, 499, 542, 789, 645, 12, 923
+                            </p>
+                            <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">(Disk with 1000 cylinders, numbered 0 to 999)</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-8">
+                        <!-- FCFS -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                            <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">FCFS (First-Come, First-Served)</h4>
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Services requests in the order they arrive.</p>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Movement:</span>
+                                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded text-sm font-medium">3792 tracks</span>
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mb-1">123 → 874 (751)</p>
+                                    <p class="mb-1">874 → 692 (182)</p>
+                                    <p class="mb-1">692 → 475 (217)</p>
+                                    <p class="mb-1">475 → 105 (370)</p>
+                                    <p class="text-gray-400 dark:text-gray-500">...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SSTF -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                            <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">SSTF (Shortest Seek Time First)</h4>
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Services the request with minimum seek time from current head position.</p>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Movement:</span>
+                                    <span class="px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 rounded text-sm font-medium">1022 tracks</span>
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mb-1">123 → 105 (18)</p>
+                                    <p class="mb-1">105 → 12 (93)</p>
+                                    <p class="mb-1">12 → 376 (364)</p>
+                                    <p class="mb-1">376 → 475 (99)</p>
+                                    <p class="text-gray-400 dark:text-gray-500">...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SCAN -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                            <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">SCAN (Elevator Algorithm)</h4>
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Moves the head in one direction, servicing requests, then reverses direction.</p>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Movement:</span>
+                                    <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 rounded text-sm font-medium">1022 tracks</span>
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mb-1">123 → 12 (111, towards 0)</p>
+                                    <p class="mb-1">12 → 923 (911, reverse direction)</p>
+                                    <p class="text-gray-400 dark:text-gray-500">Services all requests in path</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- LOOK -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                            <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">LOOK</h4>
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Similar to SCAN but only goes as far as the last request.</p>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Movement:</span>
+                                    <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 rounded text-sm font-medium">1022 tracks</span>
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mb-1">123 → 12 (111, towards 0)</p>
+                                    <p class="mb-1">12 → 923 (911, reverse direction)</p>
+                                    <p class="text-gray-400 dark:text-gray-500">Services all requests in path</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Algorithm Comparison</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white dark:bg-gray-700 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-100 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Algorithm</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Total Movement</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Advantages</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-200">Disadvantages</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">FCFS</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">3792 tracks</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Simple, fair</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Poor performance</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">SSTF</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">1022 tracks</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Minimizes seek time</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Starvation possible</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">SCAN</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">1022 tracks</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">No starvation, good performance</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Goes to disk end</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">LOOK</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">1022 tracks</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">No starvation, better than SCAN</td>
+                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">More complex</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                        <h4 class="font-semibold text-indigo-800 dark:text-indigo-200 mb-2">Key Takeaways</h4>
+                        <ul class="list-disc pl-5 text-indigo-700 dark:text-indigo-300 space-y-1">
+                            <li>SSTF provides the best performance but can lead to starvation</li>
+                            <li>SCAN and LOOK provide a good balance between performance and fairness</li>
+                            <li>FCFS is simple but has poor performance</li>
+                            <li>The choice depends on the workload and performance requirements</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Banker's Algorithm Section -->
+        <section id="bankers-algorithm" class="mb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Banker's Algorithm for Deadlock Avoidance</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">The Banker's algorithm is a resource allocation and deadlock avoidance algorithm that tests for safety by simulating the allocation of predetermined maximum possible amounts of all resources.</p>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Example Scenario</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Allocation Matrix -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Allocation Matrix</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600 overflow-x-auto">
+                                    <table class="min-w-full">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-2 py-1 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Process</th>
+                                                <th class="px-2 py-1 text-left text-sm font-medium text-gray-700 dark:text-gray-300">A</th>
+                                                <th class="px-2 py-1 text-left text-sm font-medium text-gray-700 dark:text-gray-300">B</th>
+                                                <th class="px-2 py-1 text-left text-sm font-medium text-gray-700 dark:text-gray-300">C</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P0</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">0</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">1</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">0</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P1</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">0</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">0</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P2</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">3</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">0</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P3</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">1</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">1</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P4</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">0</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">0</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Max Matrix -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Max Matrix</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600 overflow-x-auto">
+                                    <table class="min-w-full">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-2 py-1 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Process</th>
+                                                <th class="px-2 py-1 text-left text-sm font-medium text-gray-700 dark:text-gray-300">A</th>
+                                                <th class="px-2 py-1 text-left text-sm font-medium text-gray-700 dark:text-gray-300">B</th>
+                                                <th class="px-2 py-1 text-left text-sm font-medium text-gray-700 dark:text-gray-300">C</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P0</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">7</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">5</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">3</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P1</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">3</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P2</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">9</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">0</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P3</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">2</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">P4</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">4</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">3</td>
+                                                <td class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300">3</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Safety Algorithm Steps</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <ol class="list-decimal pl-5 space-y-2 text-gray-700 dark:text-gray-300">
+                                <li>Let Work and Finish be vectors of length m and n respectively. Initialize Work = Available and Finish[i] = false for i = 0, 1, ..., n-1</li>
+                                <li>Find an index i such that both
+                                    <ol class="list-disc pl-5 mt-1">
+                                        <li>Finish[i] == false</li>
+                                        <li>Need_i ≤ Work</li>
+                                    </ol>
+                                </li>
+                                <li>If no such i exists, go to step 5</li>
+                                <li>Work = Work + Allocation_i; Finish[i] = true; go to step 2</li>
+                                <li>If Finish[i] == true for all i, then the system is in a safe state</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">C Implementation</h3>
+                        <div class="bg-gray-800 rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-sm font-mono text-gray-200 overflow-x-auto">
+<span class="text-blue-400">#include</span> <span class="text-green-400">&lt;stdbool.h&gt;</span>
+<span class="text-blue-400">#include</span> <span class="text-green-400">&lt;stdio.h&gt;</span>
+
+<span class="text-blue-400">#define</span> P 5 <span class="text-gray-500">// Number of processes</span>
+<span class="text-blue-400">#define</span> R 3 <span class="text-gray-500">// Number of resources</span>
+
+<span class="text-blue-400">void</span> calculateNeed(<span class="text-blue-400">int</span> need[P][R], <span class="text-blue-400">int</span> max[P][R], <span class="text-blue-400">int</span> allot[P][R]) {
+    <span class="text-blue-400">for</span> (<span class="text-blue-400">int</span> i = <span class="text-yellow-400">0</span>; i < P; i++)
+        <span class="text-blue-400">for</span> (<span class="text-blue-400">int</span> j = <span class="text-yellow-400">0</span>; j < R; j++)
+            need[i][j] = max[i][j] - allot[i][j];
+}
+
+<span class="text-blue-400">bool</span> isSafe(<span class="text-blue-400">int</span> processes[], <span class="text-blue-400">int</span> avail[], <span class="text-blue-400">int</span> max[][R], <span class="text-blue-400">int</span> allot[][R]) {
+    <span class="text-blue-400">int</span> need[P][R];
+    calculateNeed(need, max, allot);
+
+    <span class="text-blue-400">bool</span> finish[P] = {<span class="text-yellow-400">0</span>};
+    <span class="text-blue-400">int</span> safeSeq[P];
+    <span class="text-blue-400">int</span> work[R];
+    <span class="text-blue-400">for</span> (<span class="text-blue-400">int</span> i = <span class="text-yellow-400">0</span>; i < R; i++)
+        work[i] = avail[i];
+
+    <span class="text-blue-400">int</span> count = <span class="text-yellow-400">0</span>;
+    <span class="text-blue-400">while</span> (count < P) {
+        <span class="text-blue-400">bool</span> found = <span class="text-yellow-400">false</span>;
+        <span class="text-blue-400">for</span> (<span class="text-blue-400">int</span> p = <span class="text-yellow-400">0</span>; p < P; p++) {
+            <span class="text-blue-400">if</span> (!finish[p]) {
+                <span class="text-blue-400">int</span> j;
+                <span class="text-blue-400">for</span> (j = <span class="text-yellow-400">0</span>; j < R; j++)
+                    <span class="text-blue-400">if</span> (need[p][j] > work[j])
+                        <span class="text-blue-400">break</span>;
+                
+                <span class="text-blue-400">if</span> (j == R) {
+                    <span class="text-blue-400">for</span> (<span class="text-blue-400">int</span> k = <span class="text-yellow-400">0</span>; k < R; k++)
+                        work[k] += allot[p][k];
+                    
+                    safeSeq[count++] = p;
+                    finish[p] = <span class="text-yellow-400">true</span>;
+                    found = <span class="text-yellow-400">true</span>;
+                }
+            }
+        }
+        
+        <span class="text-blue-400">if</span> (!found) {
+            printf(<span class="text-green-400">"System is not in safe state\n"</span>);
+            <span class="text-blue-400">return</span> <span class="text-yellow-400">false</span>;
+        }
+    }
+    
+    printf(<span class="text-green-400">"System is in safe state.\nSafe sequence is: "</span>);
+    <span class="text-blue-400">for</span> (<span class="text-blue-400">int</span> i = <span class="text-yellow-400">0</span>; i < P; i++)
+        printf(<span class="text-green-400">"%d "</span>, safeSeq[i]);
+    printf(<span class="text-green-400">"\n"</span>);
+    <span class="text-blue-400">return</span> <span class="text-yellow-400">true</span>;
+}
+
+<span class="text-blue-400">int</span> main() {
+    <span class="text-blue-400">int</span> processes[] = {<span class="text-yellow-400">0</span>, <span class="text-yellow-400">1</span>, <span class="text-yellow-400">2</span>, <span class="text-yellow-400">3</span>, <span class="text-yellow-400">4</span>};
+    <span class="text-blue-400">int</span> avail[] = {<span class="text-yellow-400">3</span>, <span class="text-yellow-400">3</span>, <span class="text-yellow-400">2</span>};
+    
+    <span class="text-blue-400">int</span> max[P][R] = {
+        {<span class="text-yellow-400">7</span>, <span class="text-yellow-400">5</span>, <span class="text-yellow-400">3</span>},
+        {<span class="text-yellow-400">3</span>, <span class="text-yellow-400">2</span>, <span class="text-yellow-400">2</span>},
+        {<span class="text-yellow-400">9</span>, <span class="text-yellow-400">0</span>, <span class="text-yellow-400">2</span>},
+        {<span class="text-yellow-400">2</span>, <span class="text-yellow-400">2</span>, <span class="text-yellow-400">2</span>},
+        {<span class="text-yellow-400">4</span>, <span class="text-yellow-400">3</span>, <span class="text-yellow-400">3</span>}
+    };
+    
+    <span class="text-blue-400">int</span> allot[P][R] = {
+        {<span class="text-yellow-400">0</span>, <span class="text-yellow-400">1</span>, <span class="text-yellow-400">0</span>},
+        {<span class="text-yellow-400">2</span>, <span class="text-yellow-400">0</span>, <span class="text-yellow-400">0</span>},
+        {<span class="text-yellow-400">3</span>, <span class="text-yellow-400">0</span>, <span class="text-yellow-400">2</span>},
+        {<span class="text-yellow-400">2</span>, <span class="text-yellow-400">1</span>, <span class="text-yellow-400">1</span>},
+        {<span class="text-yellow-400">0</span>, <span class="text-yellow-400">0</span>, <span class="text-yellow-400">2</span>}
+    };
+    
+    isSafe(processes, avail, max, allot);
+    <span class="text-blue-400">return</span> <span class="text-yellow-400">0</span>;
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4">
+                        <h4 class="font-semibold text-teal-800 dark:text-teal-200 mb-2">Key Takeaways</h4>
+                        <ul class="list-disc pl-5 text-teal-700 dark:text-teal-300 space-y-1">
+                            <li>The Banker's algorithm prevents deadlock by ensuring the system always remains in a safe state</li>
+                            <li>It requires knowledge of maximum resource needs in advance</li>
+                            <li>The safety algorithm checks if there's at least one sequence where all processes can complete</li>
+                            <li>While theoretically sound, it's rarely used in practice due to its assumptions and overhead</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Windows 11 Section -->
+        <section id="windows-os" class="mb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Windows 11 Operating System</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">Windows 11 introduces several enhancements and innovations in terms of process management, memory management, I/O management, file management, and security and protection.</p>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Core Components</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Process Management -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Process Management</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1">
+                                        <li>Employs preemptive multitasking approach</li>
+                                        <li>Uses Windows Scheduler to prioritize processes</li>
+                                        <li>Considers process priority, CPU time requested, and power mode</li>
+                                        <li>Ensures no single application can monopolize system resources</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Memory Management -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Memory Management</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1">
+                                        <li>Uses virtual memory system with paging</li>
+                                        <li>Memory Manager handles memory isolation between processes</li>
+                                        <li>Allows hard drive space to extend RAM when needed</li>
+                                        <li>Maintains system stability and security</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- I/O Management -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">I/O Management</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1">
+                                        <li>Uses device drivers to communicate with hardware</li>
+                                        <li>More efficient handling of device interruptions</li>
+                                        <li>Supports a wide range of devices</li>
+                                        <li>Drivers serve as translation layer between hardware and software</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- File Management -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">File Management</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1">
+                                        <li>Handled by NTFS (New Technology File System)</li>
+                                        <li>Supports large volumes, long file names, security features</li>
+                                        <li>Faster file search capabilities</li>
+                                        <li>Better integration with cloud storage services</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Security and Protection</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-2">
+                                <li><span class="font-medium">Hardware-based isolation:</span> Secures critical parts of the OS by isolating them</li>
+                                <li><span class="font-medium">Windows Hello:</span> Provides secure biometric authentication</li>
+                                <li><span class="font-medium">Windows Defender:</span> Comprehensive protection against malware and phishing</li>
+                                <li><span class="font-medium">Improved firewall:</span> Enhanced network security features</li>
+                                <li><span class="font-medium">Secure Boot:</span> Prevents unauthorized operating systems from loading</li>
+                                <li><span class="font-medium">TPM 2.0 requirement:</span> Hardware-based security for encryption keys</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-lg p-4">
+                        <h4 class="font-semibold text-pink-800 dark:text-pink-200 mb-2">Key Takeaways</h4>
+                        <ul class="list-disc pl-5 text-pink-700 dark:text-pink-300 space-y-1">
+                            <li>Windows 11 provides robust process and memory management for efficient resource utilization</li>
+                            <li>Enhanced I/O management supports a wide range of devices with efficient handling</li>
+                            <li>NTFS file system offers advanced features and cloud integration</li>
+                            <li>Security has been significantly bolstered with hardware-based features and improved protections</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LuneOS Section -->
+        <section id="luneos" class="mb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">LuneOS Mobile Operating System</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">LuneOS is a mobile operating system built upon the legacy of webOS. Its development is spearheaded by the webOS Ports community, with the aim of creating a fully open-source operating system for mobile devices.</p>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Features of LuneOS</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- UI -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <div class="flex items-start">
+                                    <div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
+                                        <i class="uil uil-mobile-android text-blue-600 dark:text-blue-400 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1 text-gray-800 dark:text-white">User Interface</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">Inherits the card-based multitasking interface from webOS, enabling intuitive app switching and management.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Connectivity -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <div class="flex items-start">
+                                    <div class="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg mr-3">
+                                        <i class="uil uil-wifi text-green-600 dark:text-green-400 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1 text-gray-800 dark:text-white">Connectivity</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">Supports Wi-Fi, Bluetooth, and cellular data for comprehensive wireless connectivity options.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Notifications -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <div class="flex items-start">
+                                    <div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg mr-3">
+                                        <i class="uil uil-bell text-purple-600 dark:text-purple-400 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1 text-gray-800 dark:text-white">Notifications</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">Innovative non-intrusive notification system accessible with simple gestures.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Web Standards -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <div class="flex items-start">
+                                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-lg mr-3">
+                                        <i class="uil uil-html5 text-yellow-600 dark:text-yellow-400 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1 text-gray-800 dark:text-white">Open Web Standards</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">Strong emphasis on HTML5, CSS, and JavaScript, making it attractive for web developers.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">System Management</h3>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <!-- Process Management -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Process Management</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1 text-sm">
+                                        <li>Uses Linux kernel at its core</li>
+                                        <li>Preemptive multitasking environment</li>
+                                        <li>Efficient CPU time allocation to processes</li>
+                                        <li>Priority assignment based on process state</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Memory Management -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Memory Management</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1 text-sm">
+                                        <li>Handled by Linux kernel</li>
+                                        <li>Uses virtual memory</li>
+                                        <li>Storage space extends RAM</li>
+                                        <li>Process isolation for stability</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Security Management -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Security Management</h4>
+                                <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-1 text-sm">
+                                        <li>Process isolation</li>
+                                        <li>Permissions system</li>
+                                        <li>Regular updates</li>
+                                        <li>SELinux for additional security</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                        <h4 class="font-semibold text-indigo-800 dark:text-indigo-200 mb-2">Key Takeaways</h4>
+                        <ul class="list-disc pl-5 text-indigo-700 dark:text-indigo-300 space-y-1">
+                            <li>LuneOS continues the webOS legacy with a modern open-source approach</li>
+                            <li>Features an intuitive card-based interface and innovative notification system</li>
+                            <li>Strong support for web standards makes it developer-friendly</li>
+                            <li>Leverages Linux kernel capabilities for robust system management</li>
+                            <li>Emphasizes security through isolation, permissions, and SELinux</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Revision Section -->
+        <section id="quick-revision" class="mb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Quick Revision</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">Key points to remember for your exams. Use these flashcards to test your knowledge.</p>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- Flashcard 1 -->
+                        <div class="flashcard cursor-pointer" onclick="this.classList.toggle('flipped')">
+                            <div class="flashcard-inner h-full">
+                                <div class="flashcard-front bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 flex flex-col">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400">Scheduling Algorithms</span>
+                                        <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded">1/8</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-center text-gray-800 dark:text-white mb-4">Which scheduling algorithm provides the minimal average waiting time?</h3>
+                                    <div class="mt-auto text-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Click to flip</span>
+                                    </div>
+                                </div>
+                                <div class="flashcard-back bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700">
+                                    <div class="h-full flex flex-col justify-center">
+                                        <p class="text-lg font-medium text-center text-gray-800 dark:text-white">Shortest Job First (SJF)</p>
+                                        <p class="text-sm text-center text-gray-600 dark:text-gray-300 mt-2">SJF minimizes waiting time by prioritizing shorter jobs, but requires knowledge of process lengths.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Flashcard 2 -->
+                        <div class="flashcard cursor-pointer" onclick="this.classList.toggle('flipped')">
+                            <div class="flashcard-inner h-full">
+                                <div class="flashcard-front bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 flex flex-col">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="text-xs font-medium text-green-600 dark:text-green-400">Page Replacement</span>
+                                        <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 rounded">2/8</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-center text-gray-800 dark:text-white mb-4">What is Belady's anomaly?</h3>
+                                    <div class="mt-auto text-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Click to flip</span>
+                                    </div>
+                                </div>
+                                <div class="flashcard-back bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-700">
+                                    <div class="h-full flex flex-col justify-center">
+                                        <p class="text-lg font-medium text-center text-gray-800 dark:text-white">More page faults with more frames</p>
+                                        <p class="text-sm text-center text-gray-600 dark:text-gray-300 mt-2">Belady's anomaly occurs in FIFO page replacement where increasing the number of page frames can lead to more page faults.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Flashcard 3 -->
+                        <div class="flashcard cursor-pointer" onclick="this.classList.toggle('flipped')">
+                            <div class="flashcard-inner h-full">
+                                <div class="flashcard-front bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 flex flex-col">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="text-xs font-medium text-purple-600 dark:text-purple-400">Disk Scheduling</span>
+                                        <span class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded">3/8</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-center text-gray-800 dark:text-white mb-4">What's the difference between SCAN and LOOK?</h3>
+                                    <div class="mt-auto text-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Click to flip</span>
+                                    </div>
+                                </div>
+                                <div class="flashcard-back bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700">
+                                    <div class="h-full flex flex-col justify-center">
+                                        <p class="text-lg font-medium text-center text-gray-800 dark:text-white">SCAN vs LOOK</p>
+                                        <p class="text-sm text-center text-gray-600 dark:text-gray-300 mt-2">SCAN moves the disk arm to the end of the disk before reversing, while LOOK only goes as far as the last request in each direction.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Flashcard 4 -->
+                        <div class="flashcard cursor-pointer" onclick="this.classList.toggle('flipped')">
+                            <div class="flashcard-inner h-full">
+                                <div class="flashcard-front bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 flex flex-col">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="text-xs font-medium text-yellow-600 dark:text-yellow-400">Banker's Algorithm</span>
+                                        <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 rounded">4/8</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-center text-gray-800 dark:text-white mb-4">What are the two main parts of Banker's algorithm?</h3>
+                                    <div class="mt-auto text-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Click to flip</span>
+                                    </div>
+                                </div>
+                                <div class="flashcard-back bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700">
+                                    <div class="h-full flex flex-col justify-center">
+                                        <p class="text-lg font-medium text-center text-gray-800 dark:text-white">Safety and Resource Request</p>
+                                        <p class="text-sm text-center text-gray-600 dark:text-gray-300 mt-2">1. Safety algorithm checks if system is in safe state. 2. Resource request algorithm handles allocation requests.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Flashcard 5 -->
+                        <div class="flashcard cursor-pointer" onclick="this.classList.toggle('flipped')">
+                            <div class="flashcard-inner h-full">
+                                <div class="flashcard-front bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700 flex flex-col">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="text-xs font-medium text-pink-600 dark:text-pink-400">Windows 11</span>
+                                        <span class="text-xs px-2 py-1 bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-200 rounded">5/8</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-center text-gray-800 dark:text-white mb-4">What file system does Windows 11 use?</h3>
+                                    <div class="mt-auto text-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Click to flip</span>
+                                    </div>
+                                </div>
+                                <div class="flashcard-back bg-pink-100 dark:bg-pink-900/30 border border-pink-200 dark:border-pink-700">
+                                    <div class="h-full flex flex-col justify-center">
+                                        <p class="text-lg font-medium text-center text-gray-800 dark:text-white">NTFS</p>
+                                        <p class="text-sm text-center text-gray-600 dark:text-gray-300 mt-2">New Technology File System (NTFS) supports large volumes, long file names, and extensive security features.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Flashcard 6 -->
+                        <div class="flashcard cursor-pointer" onclick="this.classList.toggle('flipped')">
+                            <div class="flashcard-inner h-full">
+                                <div class="flashcard-front bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 flex flex-col">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400">LuneOS</span>
+                                        <span class="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 rounded">6/8</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-center text-gray-800 dark:text-white mb-4">What is LuneOS based on?</h3>
+                                    <div class="mt-auto text-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Click to flip</span>
+                                    </div>
+                                </div>
+                                <div class="flashcard-back bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700">
+                                    <div class="h-full flex flex-col justify-center">
+                                        <p class="text-lg font-medium text-center text-gray-800 dark:text-white">webOS Legacy</p>
+                                        <p class="text-sm text-center text-gray-600 dark:text-gray-300 mt-2">LuneOS is built upon the legacy of webOS, developed by the webOS Ports community as an open-source mobile OS.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Key Formulas and Values</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Scheduling -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-600">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Scheduling Algorithms</h4>
+                                <ul class="space-y-2">
+                                    <li class="text-sm text-gray-700 dark:text-gray-300">
+                                        <span class="font-medium">Turnaround Time =</span> Completion Time - Arrival Time
+                                    </li>
+                                    <li class="text-sm text-gray-700 dark:text-gray-300">
+                                        <span class="font-medium">Waiting Time =</span> Turnaround Time - Burst Time
+                                    </li>
+                                    <li class="text-sm text-gray-700 dark:text-gray-300">
+                                        <span class="font-medium">Response Ratio =</span> (Waiting Time + Burst Time) / Burst Time
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Page Replacement -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-600">
+                                <h4 class="font-semibold mb-3 text-gray-800 dark:text-white">Page Replacement</h4>
+                                <ul class="space-y-2">
+                                    <li class="text-sm text-gray-700 dark:text-gray-300">
+                                        <span class="font-medium">Page Fault Rate =</span> Number of Page Faults / Total Memory Accesses
+                                    </li>
+                                    <li class="text-sm text-gray-700 dark:text-gray-300">
+                                        <span class="font-medium">Effective Access Time:</span> (1-p) × memory access + p × page fault time
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="text-lg font-semibold text-gray-800 dark:text-white">MCS-203 Study Guide</span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Object-Oriented Programming in C++</p>
+                </div>
+              
+            </div>
+            <div class="border-t border-gray-200 dark:border-gray-700 mt-6 pt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                <p>2023 MCS-203 Study Guide from robi 🥰🥰</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg hidden transition-opacity duration-300">
+        <i class="uil uil-arrow-up text-xl"></i>
+    </button>
+
+    <script>
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+
+        // Check for saved user preference or use system preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+        });
+
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMenu = document.getElementById('closeMenu');
+
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.remove('translate-x-full');
+        });
+
+        closeMenu.addEventListener('click', () => {
+            mobileMenu.classList.add('translate-x-full');
+        });
+
+        // Search functionality
+        const searchToggle = document.getElementById('searchToggle');
+        const searchModal = document.getElementById('searchModal');
+        const closeSearch = document.getElementById('closeSearch');
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+
+        searchToggle.addEventListener('click', () => {
+            searchModal.classList.remove('hidden');
+            searchInput.focus();
+        });
+
+        closeSearch.addEventListener('click', () => {
+            searchModal.classList.add('hidden');
+        });
+
+        // Close search when clicking outside
+        searchModal.addEventListener('click', (e) => {
+            if (e.target === searchModal) {
+                searchModal.classList.add('hidden');
+            }
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase();
+            if (query.length < 2) {
+                searchResults.innerHTML = '';
+                return;
+            }
+
+            // Remove previous highlights
+            document.querySelectorAll('.search-highlight').forEach(el => {
+                el.classList.remove('search-highlight');
+            });
+
+            // Search content (simplified for this example)
+            const content = document.body.textContent.toLowerCase();
+            if (content.includes(query)) {
+                searchResults.innerHTML = `
+                    <div class="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+                        <p class="font-medium">Results for "${query}"</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Found in content</p>
+                    </div>
+                `;
+
+                // Highlight matches in content (simplified)
+                const regex = new RegExp(query, 'gi');
+                document.body.innerHTML = document.body.innerHTML.replace(
+                    regex, 
+                    match => `<span class="search-highlight">${match}</span>`
+                );
+            } else {
+                searchResults.innerHTML = `
+                    <div class="p-3">
+                        <p class="text-gray-500 dark:text-gray-400">No results found for "${query}"</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Back to top button
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTop.classList.remove('hidden');
+            } else {
+                backToTop.classList.add('hidden');
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Tab navigation highlighting
+        const tabLinks = document.querySelectorAll('.tab-link');
+        window.addEventListener('scroll', () => {
+            const fromTop = window.scrollY + 100;
+            
+            tabLinks.forEach(link => {
+                const section = document.querySelector(link.getAttribute('href'));
+                if (
+                    section.offsetTop <= fromTop &&
+                    section.offsetTop + section.offsetHeight > fromTop
+                ) {
+                    link.classList.add('active-tab');
+                } else {
+                    link.classList.remove('active-tab');
+                }
+            });
+        });
+
+        // GSAP animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Animate sections on scroll
+        gsap.utils.toArray('section').forEach(section => {
+            gsap.from(section, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                },
+                opacity: 0,
+                y: 50,
+                duration: 0.8
+            });
+        });
+
+        // Animate hero section
+        gsap.from('#home', {
+            opacity: 0,
+            y: 20,
+            duration: 1
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('translate-x-full');
+                }
+            });
+        });
+
+        // Set initial active tab
+        document.addEventListener('DOMContentLoaded', () => {
+            tabLinks[0].classList.add('active-tab');
+        });
+    </script>
+</body>
+</html>
